@@ -12,7 +12,7 @@ import (
 var (
 	ErrAlreadyAssigned = errors.New("todo already assigned")
 	ErrNotAssigned     = errors.New("todo not assigned")
-	ErrNotStarted      = errors.New("todo never started")
+	ErrFinalized       = errors.New("todo finalized")
 )
 
 type Todo struct {
@@ -62,7 +62,23 @@ func New(title string) Todo {
 	}
 }
 
-func (td Todo) Assign(assignee string) error {
+func (td Todo) IsOngoing() bool {
+	return td.Status == apiv1.Pending || td.Status == apiv1.Assigned
+}
+
+func (td *Todo) Describe(description string) error {
+	if !td.IsOngoing() {
+		return ErrFinalized
+	}
+	td.Description = description
+	td.LastUpdateTime = time.Now()
+	return nil
+}
+
+func (td *Todo) Assign(assignee string) error {
+	if !td.IsOngoing() {
+		return ErrFinalized
+	}
 	if td.Assignee != "" {
 		return ErrAlreadyAssigned
 	}
@@ -72,17 +88,8 @@ func (td Todo) Assign(assignee string) error {
 	return nil
 }
 
-func (td Todo) Begin() error {
+func (td *Todo) Complete() error {
 	if td.Status != apiv1.Assigned {
-		return ErrNotAssigned
-	}
-	td.Status = apiv1.Ongoing
-	td.LastUpdateTime = time.Now()
-	return nil
-}
-
-func (td Todo) Complete() error {
-	if td.Status != apiv1.Ongoing {
 		return ErrNotAssigned
 	}
 	td.Status = apiv1.Completed
@@ -90,7 +97,11 @@ func (td Todo) Complete() error {
 	return nil
 }
 
-func (td Todo) Delete() {
+func (td *Todo) Delete() error {
+	if !td.IsOngoing() {
+		return ErrFinalized
+	}
 	td.Status = apiv1.Deleted
 	td.LastUpdateTime = time.Now()
+	return nil
 }

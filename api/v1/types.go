@@ -11,7 +11,6 @@ type Status string
 const (
 	Pending   Status = "pending"
 	Assigned  Status = "assigned"
-	Ongoing   Status = "ongoing"
 	Completed Status = "completed"
 	Deleted   Status = "deleted"
 )

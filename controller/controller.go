@@ -2,19 +2,14 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 
 	apiv1 "github.com/ffromani/go-todo-app/api/v1"
 	"github.com/ffromani/go-todo-app/ledger"
 	"github.com/ffromani/go-todo-app/middleware"
-	"github.com/ffromani/go-todo-app/model"
-	"github.com/ffromani/go-todo-app/store"
 )
 
 type Controller struct {
@@ -23,10 +18,10 @@ type Controller struct {
 }
 
 type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
+	Name    string
+	Method  string
+	Pattern string
+	Handler http.HandlerFunc
 }
 
 func New(ld *ledger.Ledger) http.Handler {
@@ -36,33 +31,73 @@ func New(ld *ledger.Ledger) http.Handler {
 	}
 	routes := []Route{
 		Route{
-			"Index",
-			"GET",
-			"/",
-			ctrl.Index,
+			Name:    "backlog.index",
+			Method:  "GET",
+			Pattern: "/backlog",
+			Handler: ctrl.BacklogIndex,
 		},
 		Route{
-			"TodoIndex",
-			"GET",
-			"/todos",
-			ctrl.TodoIndex,
+			Name:    "backlog.assigned",
+			Method:  "GET",
+			Pattern: "/backlog/{assignee}",
+			Handler: ctrl.BacklogAssigned,
 		},
 		Route{
-			"TodoCreate",
-			"POST",
-			"/todos",
-			ctrl.TodoCreate,
+			Name:    "completed.index",
+			Method:  "GET",
+			Pattern: "/completed",
+			Handler: ctrl.CompletedIndex,
 		},
 		Route{
-			"TodoShow",
-			"GET",
-			"/todos/{todoID}",
-			ctrl.TodoShow,
+			Name:    "completed.byassignee",
+			Method:  "GET",
+			Pattern: "/completed/{assignee}",
+			Handler: ctrl.CompletedAssigned,
+		},
+		Route{
+			Name:    "todo.index",
+			Method:  "GET",
+			Pattern: "/todos",
+			Handler: ctrl.TodoIndex,
+		},
+		Route{
+			Name:    "todo.create",
+			Method:  "POST",
+			Pattern: "/todos",
+			Handler: ctrl.TodoCreate,
+		},
+		Route{
+			Name:    "todo.show",
+			Method:  "GET",
+			Pattern: "/todos/{todoID}",
+			Handler: ctrl.TodoShow,
+		},
+		// PUT is defined to assume idempotency, so if you PUT an object twice, it should have no additional effect.
+		Route{
+			Name:    "todo.update",
+			Method:  "PUT",
+			Pattern: "/todos/{todoID}",
+			Handler: ctrl.TodoUpdate,
+		},
+		// you can complete a TODO just once
+		Route{
+			Name:    "todo.complete",
+			Method:  "POST",
+			Pattern: "/todos/{todoID}/complete",
+			Handler: ctrl.TodoComplete,
+		},
+		// you can delete a TODO just once
+		Route{
+			Name:    "todo.delete",
+			Method:  "POST",
+			Pattern: "/todos/{todoID}/delete",
+			Handler: ctrl.TodoDelete,
 		},
 	}
 
 	for _, route := range routes {
-		ctrl.router.Methods(route.Method).Path(route.Pattern).Name(route.Name).Handler(middleware.Logger(route.HandlerFunc, route.Name))
+		ctrl.router.Methods(route.Method).Path(route.Pattern).Name(route.Name).Handler(middleware.Logger(route.Handler, route.Name))
+		log.Printf("API: method: %-8s route: %s", route.Method, route.Pattern)
 	}
 	return &ctrl
 }
@@ -71,140 +106,29 @@ func (ctrl *Controller) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctrl.router.ServeHTTP(w, req)
 }
 
-func (ctrl *Controller) Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome!\n")
-}
-
-func (ctrl *Controller) TodoIndex(w http.ResponseWriter, r *http.Request) {
-	items, err := ctrl.ld.Filter(func(todo model.Todo) bool {
-		return true
-	})
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(422) // unprocessable entity
-		resp := apiv1.Response{
-			Status: apiv1.ResponseError,
-			Error: &apiv1.Error{
-				Code: 422,
-				Text: err.Error(),
-			},
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			panic(err)
-		}
-	}
-
-	resp := apiv1.Response{
-		Status: apiv1.ResponseSuccess,
-		Result: &apiv1.Result{
-			Items: items.ToAPIv1(),
-		},
-	}
-
+func sendError(w http.ResponseWriter, code int, err error) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err)
-	}
-}
-
-func (ctrl *Controller) TodoShow(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var todoID int
-	var err error
-	if todoID, err = strconv.Atoi(vars["todoID"]); err != nil {
-		panic(err)
-	}
-	todo, err := ctrl.ld.Get(store.ID(todoID))
-	if err != nil {
-		// If we didn't find it, 404
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusNotFound)
-		resp := apiv1.Response{
-			Status: apiv1.ResponseError,
-			Error: &apiv1.Error{
-				Code: 404,
-				Text: err.Error(),
-			},
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			panic(err)
-		}
-	}
-
-	apiTodo := todo.ToAPIv1()
+	w.WriteHeader(code)
 	resp := apiv1.Response{
-		Status: apiv1.ResponseSuccess,
-		Result: &apiv1.Result{
-			Items: []apiv1.Item{
-				{
-					ID:   apiv1.ID(todoID),
-					Todo: &apiTodo,
-				},
-			},
+		Status: apiv1.ResponseError,
+		Error: &apiv1.Error{
+			Code: code,
+			Text: err.Error(),
 		},
 	}
-
-	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		panic(err)
 	}
 }
 
-/*
-Test with this curl command:
-
-curl -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://localhost:8080/todos
-*/
-func (ctrl *Controller) TodoCreate(w http.ResponseWriter, r *http.Request) {
-	body, err := io.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
-	apiTodo, err := apiv1.NewTodoFromJSON(body)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(422) // unprocessable entity
-		resp := apiv1.Response{
-			Status: apiv1.ResponseError,
-			Error: &apiv1.Error{
-				Code: 422,
-				Text: err.Error(),
-			},
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			panic(err)
-		}
-	}
-
-	todo := model.NewFromAPITodo(apiTodo)
-	log.Printf("API: got object %v", todo)
-
-	todoID, err := ctrl.ld.Set(store.NullID, todo)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(422) // unprocessable entity
-		resp := apiv1.Response{
-			Status: apiv1.ResponseError,
-			Error: &apiv1.Error{
-				Code: 422,
-				Text: err.Error(),
-			},
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			panic(err)
-		}
-	}
-
+func sendItem(w http.ResponseWriter, id apiv1.ID, todo *apiv1.Todo) {
 	resp := apiv1.Response{
 		Status: apiv1.ResponseSuccess,
 		Result: &apiv1.Result{
 			Items: []apiv1.Item{
 				{
-					ID: apiv1.ID(todoID),
+					ID:   id,
+					Todo: todo,
 				},
 			},
 		},

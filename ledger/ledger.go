@@ -75,7 +75,6 @@ func (ld *Ledger) Close() error {
 func (ld *Ledger) Filter(wants Wants) (Items, error) {
 	var items []Item
 	for id, blob := range ld.blobs {
-		log.Printf("ledger: Filter: object %v (%d bytes)", id, len(blob))
 		todo, err := model.DeserializeTodo(blob)
 		if err != nil {
 			return items, err
@@ -83,7 +82,7 @@ func (ld *Ledger) Filter(wants Wants) (Items, error) {
 		if !wants(todo) {
 			continue
 		}
-		log.Printf("ledger: Filter: object %v is wanted", id)
+		log.Printf("ledger: Filter: object %v included", id)
 		items = append(items, Item{
 			ID:   id,
 			Todo: &todo,
@@ -122,7 +121,7 @@ func (ld *Ledger) Set(id store.ID, todo model.Todo) (blobID store.ID, rerr error
 		return todoID, nil
 	}
 
-	log.Printf("ledger: Set: updaring object %v (%v)", id, blob)
+	log.Printf("ledger: Set: updating object %v (%d bytes)", id, len(blob))
 	curBlob, found := ld.blobs[id]
 	if !found {
 		return store.NullID, ErrNotFound
