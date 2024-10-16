@@ -67,7 +67,7 @@ func (ctrl *Controller) TodoCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo := model.NewFromAPITodo(apiTodo)
+	todo := model.NewFromAPIv1(apiTodo)
 	log.Printf("API: got object %v", todo)
 
 	todoID, err := ctrl.ld.Set(store.NullID, todo)

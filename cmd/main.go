@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +16,7 @@ func main() {
 	if err != nil {
 		log.Printf("error parsing flags: %v", err)
 	}
-	log.Printf("ready: configuration:\n%s", toJSON(cfg))
+	log.Printf("ready: configuration:\n%s", cfg.String())
 
 	st, err := fake.NewMem()
 	if err != nil {
@@ -37,12 +35,4 @@ func main() {
 
 	log.Printf("start serving on address %q", cfg.Address)
 	log.Fatal(http.ListenAndServe(cfg.Address, ctrl))
-}
-
-func toJSON(v any) string {
-	x, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("<JSON marshal error: %v>", err)
-	}
-	return string(x)
 }

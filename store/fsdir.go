@@ -9,10 +9,15 @@ import (
 	"strings"
 )
 
+// A FileSystem Directory store can be processed only by a single
+// instance at time to avoid data corruption. So we use a simple
+// file-based locking model
 const (
 	lockFile string = ".lock"
 )
 
+// ErrDifferentOwner is used when another datastore instance is
+// processing this datastore directory
 type ErrDifferentOwner struct {
 	pid int
 }
@@ -43,59 +48,8 @@ func NewFSDir(fsPath string) (*FSDir, error) {
 	return &fsDir, nil
 }
 
-func (dr *FSDir) getLastObjectID() (ID, error) {
-	var lastObjectID ID
-	rerr := filepath.WalkDir(dr.fsPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return ErrCorruptedContent{Name: path}
-		}
-		fName := filepath.Base(path)
-		if fName == lockFile {
-			return nil // treat explicitely our metadata
-		}
-		if strings.HasPrefix(fName, ".") {
-			return nil // ignore
-		}
-		objectID, cerr := strconv.Atoi(fName)
-		if cerr != nil {
-			return ErrCorruptedContent{Name: path}
-		}
-		lastObjectID = max(ID(objectID), lastObjectID)
-		return nil
-	})
-	return lastObjectID, rerr
-}
-
-func (dr *FSDir) getOwner() (int, error) {
-	lockPath := filepath.Join(dr.fsPath, lockFile)
-	data, err := os.ReadFile(lockPath)
-	if err != nil {
-		return 0, err
-	}
-	return strconv.Atoi(string(data))
-}
-
-func (dr *FSDir) checkOwnedByMe() error {
-	curPid, err := dr.getOwner()
-	if err != nil {
-		return err
-	}
-	if curPid != dr.pid {
-		return ErrDifferentOwner{pid: curPid}
-	}
-	return nil
-}
-
-func (dr *FSDir) setMeAsOwner() error {
-	lockPath := filepath.Join(dr.fsPath, lockFile)
-	return os.WriteFile(lockPath, []byte(strconv.Itoa(dr.pid)), 0644)
-}
-
 func (dr *FSDir) Close() error {
-	return nil
+	return dr.releaseOwnership()
 }
 
 func (dr *FSDir) Create(data Blob) (ID, error) {
@@ -174,4 +128,80 @@ func (dr *FSDir) Delete(id ID) error {
 	}
 	objPath := filepath.Join(dr.fsPath, strconv.FormatInt(int64(id), 10))
 	return os.Remove(objPath)
+}
+
+// getLastObjectID scans the directory content to find the last (highest) used ID,
+// in order to determine the next free one to use
+func (dr *FSDir) getLastObjectID() (ID, error) {
+	var lastObjectID ID
+	rerr := filepath.WalkDir(dr.fsPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return ErrCorruptedContent{Name: path}
+		}
+		fName := filepath.Base(path)
+		if fName == lockFile {
+			return nil // treat explicitely our metadata
+		}
+		if strings.HasPrefix(fName, ".") {
+			return nil // ignore
+		}
+		objectID, cerr := strconv.Atoi(fName)
+		if cerr != nil {
+			return ErrCorruptedContent{Name: path}
+		}
+		lastObjectID = max(ID(objectID), lastObjectID)
+		return nil
+	})
+	return lastObjectID, rerr
+}
+
+// getOwner returns the process (by its PID) currently owning the datastore
+// on failure, error is not nil
+func (dr *FSDir) getOwner() (int, error) {
+	lockPath := filepath.Join(dr.fsPath, lockFile)
+	data, err := os.ReadFile(lockPath)
+	if err != nil {
+		return 0, err
+	}
+	return strconv.Atoi(string(data))
+}
+
+// checkOwnedByMe returns nil if the current process is the one owning (processing)
+// the backing directory, or error otherwise
+func (dr *FSDir) checkOwnedByMe() error {
+	curPid, err := dr.getOwner()
+	if err != nil {
+		return err
+	}
+	if curPid != dr.pid {
+		return ErrDifferentOwner{pid: curPid}
+	}
+	return nil
+}
+
+// setMeAsOwner sets the locking in the backing directory such as the current process (by its pid)
+// is the one owner, or error otherwise
+func (dr *FSDir) setMeAsOwner() error {
+	tmpLock, err := os.CreateTemp(dr.fsPath, "_tmplock")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmpLock.Name()) // on error we don't care of losing this content
+	if _, err := tmpLock.Write([]byte(strconv.Itoa(dr.pid))); err != nil {
+		return err
+	}
+	if err := tmpLock.Close(); err != nil {
+		return err
+	}
+	lockPath := filepath.Join(dr.fsPath, lockFile)
+	return os.Rename(tmpLock.Name(), lockPath)
+}
+
+// releaseOnwership clears the owner of the backing directory and removes the locking
+func (dr *FSDir) releaseOwnership() error {
+	lockPath := filepath.Join(dr.fsPath, lockFile)
+	return os.Remove(lockPath)
 }
