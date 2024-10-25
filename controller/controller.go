@@ -93,6 +93,12 @@ func New(ld *ledger.Ledger) http.Handler {
 			Pattern: "/todos/{todoID}/delete",
 			Handler: ctrl.TodoDelete,
 		},
+		Route{
+			Name:    "todo.merge",
+			Method:  "POST",
+			Pattern: "/todomerge/{todoID1}/{todoID2}",
+			Handler: ctrl.TodoMerge,
+		},
 	}
 
 	for _, route := range routes {
