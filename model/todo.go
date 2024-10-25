@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"time"
 
 	apiv1 "github.com/ffromani/go-todo-app/api/v1"
@@ -86,6 +87,33 @@ func New(title string) Todo {
 // (hence the "final").
 func (td Todo) IsOngoing() bool {
 	return td.Status == apiv1.Pending || td.Status == apiv1.Assigned
+}
+
+func (t Todo) HTMLRow() ([]byte, error) {
+	const tt = `<tr>
+    <td>{{ .Title }}</td>
+    <td>{{ .Assignee }}</td>
+    <td>{{ .Description }}</td>
+    <td>{{ .Status }}</td>
+    <td>{{ printTime .LastUpdateTime }}</td>
+  </tr>`
+	t.LastUpdateTime.Format("")
+	templ, err := template.New("tablerow").Funcs(
+		template.FuncMap{
+			"printTime": func(t time.Time) string {
+				return t.Format(time.RFC3339)
+			},
+		}).Parse(tt)
+	if err != nil {
+		return nil, err
+	}
+
+	var buff bytes.Buffer
+	err = templ.Execute(&buff, t)
+	if err != nil {
+		return nil, err
+	}
+	return buff.Bytes(), nil
 }
 
 // Describe changes the description of an object.
