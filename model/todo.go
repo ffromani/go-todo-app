@@ -156,13 +156,17 @@ func Merge(td1, td2 Todo) (Todo, error) {
 	if td1.Status == apiv1.Assigned || td2.Status == apiv1.Assigned {
 		status = apiv1.Assigned
 	}
+	lastUpdateTime := td1.LastUpdateTime
+	if lastUpdateTime.Before(td2.LastUpdateTime) {
+		lastUpdateTime = td2.LastUpdateTime
+	}
 
 	res := Todo{
 		Title:          fmt.Sprintf("%s-%s", td1.Title, td2.Title),
 		Description:    fmt.Sprintf("%s-%s", td1.Description, td2.Description),
 		Assignee:       assignee,
 		Status:         status,
-		LastUpdateTime: time.Now(),
+		LastUpdateTime: lastUpdateTime,
 	}
 	return res, nil
 }
