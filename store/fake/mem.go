@@ -5,8 +5,9 @@ import (
 )
 
 type Mem struct {
-	Blobs    map[store.ID]store.Blob
-	Error    error
+	Blobs map[store.ID]store.Blob
+	Error error
+	// Generate returns a generated item, true when the generation ends, error to abort the generation eith error
 	Generate func() (store.Item, bool, error)
 }
 
@@ -66,6 +67,10 @@ func (mm *Mem) Save(id store.ID, blob store.Blob) error {
 	if mm.Error != nil {
 		return mm.Error
 	}
+	_, ok := mm.Blobs[id]
+	if !ok {
+		return store.ErrNotFound{ID: id}
+	}
 	mm.Blobs[id] = blob
 	return nil
 }
@@ -73,6 +78,10 @@ func (mm *Mem) Save(id store.ID, blob store.Blob) error {
 func (mm *Mem) Delete(id store.ID) error {
 	if mm.Error != nil {
 		return mm.Error
+	}
+	_, ok := mm.Blobs[id]
+	if !ok {
+		return store.ErrNotFound{ID: id}
 	}
 	delete(mm.Blobs, id)
 	return nil
