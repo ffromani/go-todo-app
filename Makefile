@@ -8,3 +8,6 @@ clean:
 
 binaries: outdir
 	go build -v -o _out/todo cmd/main.go
+
+test-unit:
+	go test -cover ./...
