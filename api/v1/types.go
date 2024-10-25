@@ -3,6 +3,7 @@ package v1
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"time"
 )
 
@@ -44,6 +45,16 @@ func (td Todo) ToJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(td)
 	return buf.Bytes(), err
+}
+
+// NewTodoFromJSONReader creates a new todo from a bytestream, which is expected to contain
+// a valid JSON encoding (e.g. from ToJSON). If succesfull, returns the decoded todo
+// and error is nil; otherwise, returns a zero-valued Todo and an error describing the
+// decoding failure
+func NewTodoFromJSONReader(r io.Reader) (Todo, error) {
+	var todo Todo
+	err := json.NewDecoder(r).Decode(&todo)
+	return todo, err
 }
 
 // NewTodoFromJSON creates a new todo from a bytestream, which is expected to contain

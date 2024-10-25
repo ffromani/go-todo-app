@@ -248,13 +248,22 @@ func (ctrl *Controller) TodoMerge(w http.ResponseWriter, r *http.Request) {
 
 func todoFromRequest(r *http.Request) (apiv1.Todo, int, error) {
 	body, err := io.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return apiv1.Todo{}, 500, err
 	}
 	if err := r.Body.Close(); err != nil {
 		return apiv1.Todo{}, 500, err
 	}
 	apiTodo, err := apiv1.NewTodoFromJSON(body)
+	if err != nil {
+		return apiv1.Todo{}, 500, err
+	}
+	return apiTodo, 0, nil
+}
+
+func todoFromRequestReader(r *http.Request) (apiv1.Todo, int, error) {
+	defer r.Body.Close()
+	apiTodo, err := apiv1.NewTodoFromJSONReader(r.Body)
 	if err != nil {
 		return apiv1.Todo{}, 500, err
 	}
