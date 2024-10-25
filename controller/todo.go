@@ -194,6 +194,58 @@ func (ctrl *Controller) TodoDelete(w http.ResponseWriter, r *http.Request) {
 	sendItem(w, apiv1.ID(todoID), &resTodo)
 }
 
+func (ctrl *Controller) TodoMerge(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id1, err := strconv.Atoi(vars["todoID1"])
+	if err != nil {
+		sendError(w, 500, err)
+		return
+	}
+
+	id2, err := strconv.Atoi(vars["todoID2"])
+	if err != nil {
+		sendError(w, 500, err)
+		return
+	}
+	todo1, err := ctrl.ld.Get(store.ID(id1))
+	if err != nil {
+		sendError(w, 404, err)
+		return
+	}
+	todo2, err := ctrl.ld.Get(store.ID(id2))
+	if err != nil {
+		sendError(w, 404, err)
+		return
+	}
+	log.Printf("API: got objects %v - %v", todo1, todo2)
+
+	merged, err := model.Merge(todo1, todo2)
+	if err != nil {
+		sendError(w, 422, err)
+		return
+	}
+
+	err = ctrl.ld.Delete(store.ID(id1))
+	if err != nil {
+		sendError(w, 422, err)
+		return
+	}
+	err = ctrl.ld.Delete(store.ID(id2))
+	if err != nil {
+		sendError(w, 422, err)
+		return
+	}
+
+	mergedID, err := ctrl.ld.Set(store.NullID, merged)
+	if err != nil {
+		sendError(w, 422, err)
+		return
+	}
+
+	resTodo := merged.ToAPIv1()
+	sendItem(w, apiv1.ID(mergedID), &resTodo)
+}
+
 func todoFromRequest(r *http.Request) (apiv1.Todo, int, error) {
 	body, err := io.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {

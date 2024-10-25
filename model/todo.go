@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	apiv1 "github.com/ffromani/go-todo-app/api/v1"
@@ -136,4 +137,32 @@ func (td *Todo) Delete() error {
 	td.Status = apiv1.Deleted
 	td.LastUpdateTime = time.Now()
 	return nil
+}
+
+// Merge takes two todo items, merges them into a new Todo item..
+func Merge(td1, td2 Todo) (Todo, error) {
+	if !td1.IsOngoing() || !td2.IsOngoing() {
+		return Todo{}, ErrFinalized
+	}
+	if td1.Assignee != "" && td2.Assignee != "" && td1.Assignee != td2.Assignee {
+		return Todo{}, errors.New("can't merge items with different assignees")
+	}
+	assignee := td1.Assignee
+	if assignee == "" {
+		assignee = td2.Assignee
+	}
+
+	status := apiv1.Pending
+	if td1.Status == apiv1.Assigned || td2.Status == apiv1.Assigned {
+		status = apiv1.Assigned
+	}
+
+	res := Todo{
+		Title:          fmt.Sprintf("%s-%s", td1.Title, td2.Title),
+		Description:    fmt.Sprintf("%s-%s", td1.Description, td2.Description),
+		Assignee:       assignee,
+		Status:         status,
+		LastUpdateTime: time.Now(),
+	}
+	return res, nil
 }
