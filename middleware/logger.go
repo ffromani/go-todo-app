@@ -3,6 +3,7 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -13,8 +14,8 @@ func Logger(inner http.Handler, name string) http.Handler {
 
 		inner.ServeHTTP(w, r)
 
-		log.Printf(
-			"middleare: %-6s\t%s\t%s\t%s",
+		logSink := log.New(os.Stdout, "middleware: ", log.LstdFlags)
+		logSink.Printf("%-6s\t%s\t%s\t%s",
 			r.Method,
 			r.RequestURI,
 			name,
