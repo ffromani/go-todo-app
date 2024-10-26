@@ -18,7 +18,7 @@ func (ctrl *Controller) TodoIndex(w http.ResponseWriter, r *http.Request) {
 		return true
 	})
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -41,7 +41,7 @@ func (ctrl *Controller) TodoShow(w http.ResponseWriter, r *http.Request) {
 	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
-		sendError(w, 404, err)
+		sendError(w, http.StatusNotFound, err)
 		return
 	}
 
@@ -66,12 +66,12 @@ func (ctrl *Controller) TodoCreate(w http.ResponseWriter, r *http.Request) {
 
 	todoID, err := ctrl.uuidGen.NewUUID()
 	if err != nil {
-		sendError(w, 505, err)
+		sendError(w, http.StatusServiceUnavailable, err)
 		return
 	}
 
 	if err := ctrl.ld.Set(store.ID(todoID), todo); err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -89,17 +89,17 @@ func (ctrl *Controller) TodoUpdate(w http.ResponseWriter, r *http.Request) {
 	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
-		sendError(w, 404, err)
+		sendError(w, http.StatusNotFound, err)
 		return
 	}
 	log.Printf("API: got object %v", todoID)
 
 	if err := todo.Describe(apiTodo.Description); err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	if err := todo.Assign(apiTodo.Assignee); err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -107,7 +107,7 @@ func (ctrl *Controller) TodoUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err = ctrl.ld.Set(store.ID(todoID), todo)
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -126,13 +126,13 @@ func (ctrl *Controller) TodoComplete(w http.ResponseWriter, r *http.Request) {
 	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
-		sendError(w, 404, err)
+		sendError(w, http.StatusNotFound, err)
 		return
 	}
 	log.Printf("API: got object %v", todoID)
 
 	if err := todo.Complete(); err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -140,7 +140,7 @@ func (ctrl *Controller) TodoComplete(w http.ResponseWriter, r *http.Request) {
 
 	err = ctrl.ld.Set(store.ID(todoID), todo)
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -159,13 +159,13 @@ func (ctrl *Controller) TodoDelete(w http.ResponseWriter, r *http.Request) {
 	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
-		sendError(w, 404, err)
+		sendError(w, http.StatusNotFound, err)
 		return
 	}
 	log.Printf("API: got object %v", todoID)
 
 	if err := todo.Delete(); err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -173,7 +173,7 @@ func (ctrl *Controller) TodoDelete(w http.ResponseWriter, r *http.Request) {
 
 	err = ctrl.ld.Set(store.ID(todoID), todo)
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -188,41 +188,41 @@ func (ctrl *Controller) TodoMerge(w http.ResponseWriter, r *http.Request) {
 
 	todo1, err := ctrl.ld.Get(store.ID(id1))
 	if err != nil {
-		sendError(w, 404, err)
+		sendError(w, http.StatusNotFound, err)
 		return
 	}
 	todo2, err := ctrl.ld.Get(store.ID(id2))
 	if err != nil {
-		sendError(w, 404, err)
+		sendError(w, http.StatusNotFound, err)
 		return
 	}
 	log.Printf("API: got objects %v - %v", todo1, todo2)
 
 	merged, err := model.Merge(todo1, todo2)
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	err = ctrl.ld.Delete(store.ID(id1))
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	err = ctrl.ld.Delete(store.ID(id2))
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	mergedID, err := ctrl.uuidGen.NewUUID()
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	err = ctrl.ld.Set(store.ID(mergedID), merged)
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 

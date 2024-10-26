@@ -16,7 +16,7 @@ func (ctrl *Controller) BacklogIndex(w http.ResponseWriter, r *http.Request) {
 		return todo.IsOngoing()
 	})
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -38,14 +38,14 @@ func (ctrl *Controller) BacklogAssigned(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	assignee, ok := vars["assignee"]
 	if !ok {
-		sendError(w, 500, fmt.Errorf("missing assignee"))
+		sendError(w, http.StatusInternalServerError, fmt.Errorf("missing assignee"))
 		return
 	}
 	items, err := ctrl.ld.Filter(func(todo model.Todo) bool {
 		return todo.IsOngoing() && todo.Assignee == assignee
 	})
 	if err != nil {
-		sendError(w, 422, err)
+		sendError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
