@@ -48,7 +48,7 @@ func (dr *FSDir) Close() error {
 	return dr.releaseOwnership()
 }
 
-func (dr *FSDir) Create(data Blob, objectID ID) error {
+func (dr *FSDir) Create(objectID ID, data Blob) error {
 	if err := dr.checkOwnedByMe(); err != nil {
 		return err
 	}

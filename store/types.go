@@ -15,11 +15,11 @@ const (
 
 type Storage interface {
 	Close() error
-	Create(Blob, ID) error
+	Create(ID, Blob) error
 	LoadAll() ([]Item, error)
-	Load(id ID) (Blob, error)
-	Save(id ID, blob Blob) error
-	Delete(id ID) error
+	Load(ID) (Blob, error)
+	Save(ID, Blob) error
+	Delete(ID) error
 }
 
 // Item binds a Todo with its ID identifier

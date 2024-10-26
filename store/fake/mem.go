@@ -25,7 +25,7 @@ func (mm *Mem) Close() error {
 	return mm.Error
 }
 
-func (mm *Mem) Create(data store.Blob, objectID store.ID) error {
+func (mm *Mem) Create(objectID store.ID, data store.Blob) error {
 	if mm.Error != nil {
 		return mm.Error
 	}

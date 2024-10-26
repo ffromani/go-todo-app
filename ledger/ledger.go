@@ -110,9 +110,6 @@ func (ld *Ledger) Get(id store.ID) (model.Todo, error) {
 }
 
 // Set creates or updates Todo objects in the store.
-// On update, expects a valid ID and returns the ID of the processed object, same as the given value.
-// On create, expects a NullID, returns the ID of the created object.
-// On failure, in all cases, error is not nil, and the ID must be ignored.
 func (ld *Ledger) Set(id store.ID, todo model.Todo) (rerr error) {
 	blob, err := todo.Serialize()
 	if err != nil {

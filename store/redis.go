@@ -27,8 +27,8 @@ func (rd *Redis) Close() error {
 	return rd.rdb.Close()
 }
 
-func (rd *Redis) Create(data Blob, id ID) error {
-	err := rd.rdb.Set(context.Background(), string(id), data, 0).Err()
+func (rd *Redis) Create(objectID ID, data Blob) error {
+	err := rd.rdb.Set(context.Background(), string(objectID), data, 0).Err()
 	if err != nil {
 		return err
 	}
@@ -47,10 +47,10 @@ func (rd *Redis) LoadAll() ([]Item, error) {
 	return res, nil
 }
 
-func (rd *Redis) Load(id ID) (Blob, error) {
-	data, err := rd.rdb.Get(context.Background(), string(id)).Result()
+func (rd *Redis) Load(objectID ID) (Blob, error) {
+	data, err := rd.rdb.Get(context.Background(), string(objectID)).Result()
 	if err == redis.Nil {
-		return nil, fmt.Errorf("id %s does not exist", id)
+		return nil, fmt.Errorf("id %s does not exist", objectID)
 	}
 	if err != nil {
 		return nil, err
@@ -58,20 +58,20 @@ func (rd *Redis) Load(id ID) (Blob, error) {
 	return Blob(data), nil
 }
 
-func (rd *Redis) Save(id ID, blob Blob) error {
+func (rd *Redis) Save(objectID ID, blob Blob) error {
 	// Non thread safe!
-	data, err := rd.rdb.Get(context.Background(), string(id)).Result()
+	data, err := rd.rdb.Get(context.Background(), string(objectID)).Result()
 	if err == redis.Nil {
-		return fmt.Errorf("id %s does not exist", id)
+		return fmt.Errorf("id %s does not exist", objectID)
 	}
 
-	err = rd.rdb.Set(context.Background(), string(id), data, 0).Err()
+	err = rd.rdb.Set(context.Background(), string(objectID), data, 0).Err()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (rd *Redis) Delete(id ID) error {
+func (rd *Redis) Delete(objectID ID) error {
 	return nil
 }
