@@ -13,27 +13,9 @@ var (
 	ErrNotFound = errors.New("object not found")
 )
 
-// BlobStorer represents the datastore behavior the Ledger requires
-// for its operations.
-type BlobStorer interface {
-	// Close the datastore. This datastore won't be usable again.
-	Close() error
-	// Create a new blob; returns the ID of the newly created object
-	// on success, error otherwise
-	Create(data store.Blob) (store.ID, error)
-	// LoadAll returns all the items (binding ID/Blob) in the datastore
-	LoadAll() ([]store.Item, error)
-	// Load returns the blob matching the given id, error otherwise
-	Load(id store.ID) (store.Blob, error)
-	// Save updates an existing blob in the datastore, identified by its id; returns error if fails
-	Save(id store.ID, blob store.Blob) error
-	// Delete removes an object from the datastore, by its ID; returns error if fails
-	Delete(id store.ID) error
-}
-
 // Ledger represents a Todo object store
 type Ledger struct {
-	storer BlobStorer
+	storer store.Storage
 	blobs  map[store.ID]store.Blob
 }
 
@@ -71,7 +53,7 @@ type Wants func(todo model.Todo) bool
 // New creates and initializes a new Ledger based on the given datastore and its contents.
 // To initialize itself, a Ledger eagerly loads all the content of the datastore.
 // Returns error if the initialization fails; in this case, the returned ledger instance must be ignored.
-func New(storer BlobStorer) (*Ledger, error) {
+func New(storer store.Storage) (*Ledger, error) {
 	items, err := storer.LoadAll()
 	if err != nil {
 		return nil, err
@@ -131,27 +113,20 @@ func (ld *Ledger) Get(id store.ID) (model.Todo, error) {
 // On update, expects a valid ID and returns the ID of the processed object, same as the given value.
 // On create, expects a NullID, returns the ID of the created object.
 // On failure, in all cases, error is not nil, and the ID must be ignored.
-func (ld *Ledger) Set(id store.ID, todo model.Todo) (blobID store.ID, rerr error) {
+func (ld *Ledger) Set(id store.ID, todo model.Todo) (rerr error) {
 	blob, err := todo.Serialize()
 	if err != nil {
-		return store.NullID, err
+		return err
 	}
 
 	if id == store.NullID {
-		log.Printf("ledger: Set: create new object (%d bytes)", len(blob))
-		todoID, err := ld.storer.Create(blob)
-		if err != nil {
-			return store.NullID, err
-		}
-		ld.blobs[todoID] = blob
-		log.Printf("ledger: Set: created new object %v (%d bytes)", todoID, len(blob))
-		return todoID, nil
+		return errors.New("can't set null id")
 	}
 
 	log.Printf("ledger: Set: updating object %v (%d bytes)", id, len(blob))
 	curBlob, found := ld.blobs[id]
 	if !found {
-		return store.NullID, ErrNotFound
+		return ErrNotFound
 	}
 	// rollback
 	defer func() {
@@ -165,7 +140,7 @@ func (ld *Ledger) Set(id store.ID, todo model.Todo) (blobID store.ID, rerr error
 	log.Printf("ledger: Set: updated cache object %v (%d bytes)", id, len(blob))
 	rerr = ld.storer.Save(id, blob)
 	log.Printf("ledger: Set: updated store object %v err=%v", id, err)
-	return id, rerr
+	return rerr
 }
 
 // Delete removes a Todo from the ledger. The ledger may recycle IDs of deleted objects.

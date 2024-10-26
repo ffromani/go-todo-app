@@ -10,11 +10,13 @@ import (
 	apiv1 "github.com/ffromani/go-todo-app/api/v1"
 	"github.com/ffromani/go-todo-app/ledger"
 	"github.com/ffromani/go-todo-app/middleware"
+	"github.com/ffromani/go-todo-app/uuid"
 )
 
 type Controller struct {
-	router *mux.Router
-	ld     *ledger.Ledger
+	router  *mux.Router
+	ld      *ledger.Ledger
+	uuidGen uuid.UUIDGenerator
 }
 
 type Route struct {
@@ -26,8 +28,9 @@ type Route struct {
 
 func New(ld *ledger.Ledger) http.Handler {
 	ctrl := Controller{
-		ld:     ld,
-		router: mux.NewRouter().StrictSlash(true),
+		ld:      ld,
+		uuidGen: uuid.New(),
+		router:  mux.NewRouter().StrictSlash(true),
 	}
 	routes := []Route{
 		Route{

@@ -14,8 +14,8 @@ import (
 
 func BenchmarkTodoFromRequest(b *testing.B) {
 	todo := model.New("todo")
-	todo.Assign("fede")
-	todo.Describe("hello")
+	_ = todo.Assign("fede")
+	_ = todo.Describe("hello")
 
 	serialized, err := todo.Serialize()
 	if err != nil {
@@ -24,7 +24,7 @@ func BenchmarkTodoFromRequest(b *testing.B) {
 
 	body := bytes.NewReader(serialized)
 	for i := 0; i < b.N; i++ {
-		body.Seek(0, io.SeekStart)
+		_, _ = body.Seek(0, io.SeekStart)
 		req := httptest.NewRequest(http.MethodGet, "/foo", body)
 		_, code, err := todoFromRequest(req)
 		// _, code, err := todoFromRequestReader(req)

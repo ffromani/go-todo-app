@@ -23,7 +23,7 @@ const (
 )
 
 // ID is an opaque value which uniquely identifies a Todo. Can only be compared for equality
-type ID int64
+type ID string
 
 // Todo represent a todo item managed by the system
 type Todo struct {

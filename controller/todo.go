@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 
@@ -39,12 +38,7 @@ func (ctrl *Controller) TodoIndex(w http.ResponseWriter, r *http.Request) {
 
 func (ctrl *Controller) TodoShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	var todoID int
-	var err error
-	if todoID, err = strconv.Atoi(vars["todoID"]); err != nil {
-		sendError(w, 422, err)
-		return
-	}
+	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
 		sendError(w, 404, err)
@@ -70,8 +64,13 @@ func (ctrl *Controller) TodoCreate(w http.ResponseWriter, r *http.Request) {
 	todo := model.NewFromAPIv1(apiTodo)
 	log.Printf("API: got object %v", todo)
 
-	todoID, err := ctrl.ld.Set(store.NullID, todo)
+	todoID, err := ctrl.uuidGen.NewUUID()
 	if err != nil {
+		sendError(w, 505, err)
+		return
+	}
+
+	if err := ctrl.ld.Set(store.ID(todoID), todo); err != nil {
 		sendError(w, 422, err)
 		return
 	}
@@ -87,11 +86,7 @@ func (ctrl *Controller) TodoUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vars := mux.Vars(r)
-	todoID, err := strconv.Atoi(vars["todoID"])
-	if err != nil {
-		sendError(w, 500, err)
-		return
-	}
+	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
 		sendError(w, 404, err)
@@ -110,7 +105,7 @@ func (ctrl *Controller) TodoUpdate(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("API: updated object %v as: %q", todoID, todo)
 
-	_, err = ctrl.ld.Set(store.ID(todoID), todo)
+	err = ctrl.ld.Set(store.ID(todoID), todo)
 	if err != nil {
 		sendError(w, 422, err)
 		return
@@ -128,11 +123,7 @@ func (ctrl *Controller) TodoComplete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vars := mux.Vars(r)
-	todoID, err := strconv.Atoi(vars["todoID"])
-	if err != nil {
-		sendError(w, 500, err)
-		return
-	}
+	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
 		sendError(w, 404, err)
@@ -147,7 +138,7 @@ func (ctrl *Controller) TodoComplete(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("API: completed object %v as: %q", todoID, todo)
 
-	_, err = ctrl.ld.Set(store.ID(todoID), todo)
+	err = ctrl.ld.Set(store.ID(todoID), todo)
 	if err != nil {
 		sendError(w, 422, err)
 		return
@@ -165,11 +156,7 @@ func (ctrl *Controller) TodoDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vars := mux.Vars(r)
-	todoID, err := strconv.Atoi(vars["todoID"])
-	if err != nil {
-		sendError(w, 500, err)
-		return
-	}
+	todoID := vars["todoID"]
 	todo, err := ctrl.ld.Get(store.ID(todoID))
 	if err != nil {
 		sendError(w, 404, err)
@@ -184,7 +171,7 @@ func (ctrl *Controller) TodoDelete(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("API: deleted object %v as: %q", todoID, todo)
 
-	_, err = ctrl.ld.Set(store.ID(todoID), todo)
+	err = ctrl.ld.Set(store.ID(todoID), todo)
 	if err != nil {
 		sendError(w, 422, err)
 		return
@@ -196,17 +183,9 @@ func (ctrl *Controller) TodoDelete(w http.ResponseWriter, r *http.Request) {
 
 func (ctrl *Controller) TodoMerge(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id1, err := strconv.Atoi(vars["todoID1"])
-	if err != nil {
-		sendError(w, 500, err)
-		return
-	}
+	id1 := vars["todoID1"]
+	id2 := vars["todoID2"]
 
-	id2, err := strconv.Atoi(vars["todoID2"])
-	if err != nil {
-		sendError(w, 500, err)
-		return
-	}
 	todo1, err := ctrl.ld.Get(store.ID(id1))
 	if err != nil {
 		sendError(w, 404, err)
@@ -236,7 +215,12 @@ func (ctrl *Controller) TodoMerge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mergedID, err := ctrl.ld.Set(store.NullID, merged)
+	mergedID, err := ctrl.uuidGen.NewUUID()
+	if err != nil {
+		sendError(w, 422, err)
+		return
+	}
+	err = ctrl.ld.Set(store.ID(mergedID), merged)
 	if err != nil {
 		sendError(w, 422, err)
 		return
