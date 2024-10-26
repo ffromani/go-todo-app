@@ -41,7 +41,9 @@ func TestRender(t *testing.T) {
 			}
 			goldenFile := filepath.Join("testdata", strings.ReplaceAll(tc.name, " ", "-")+".golden")
 			if *update {
-				os.WriteFile(goldenFile, rendered, os.ModePerm)
+				if err := os.WriteFile(goldenFile, rendered, os.ModePerm); err != nil {
+					panic("write failed")
+				}
 			}
 			expected, err := os.ReadFile(goldenFile)
 			if err != nil {
