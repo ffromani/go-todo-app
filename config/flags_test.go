@@ -1,5 +1,7 @@
 package config
 
+// example
+
 import (
 	"testing"
 
