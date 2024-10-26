@@ -1,6 +1,6 @@
 package middleware
 
-// exercise:part1
+// solution:part1
 
 import (
 	"net/http"

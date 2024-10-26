@@ -1,6 +1,6 @@
 package v1
 
-// exercise:part1
+// solution:part1
 
 import (
 	"testing"
