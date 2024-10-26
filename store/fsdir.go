@@ -27,10 +27,11 @@ func (e ErrDifferentOwner) Error() string {
 }
 
 type FSDir struct {
-	lastObjectID ID
-	pid          int
-	fsPath       string
+	pid    int
+	fsPath string
 }
+
+var _ Storage = &FSDir{}
 
 func NewFSDir(fsPath string) (*FSDir, error) {
 	fsDir := FSDir{
@@ -40,11 +41,6 @@ func NewFSDir(fsPath string) (*FSDir, error) {
 	if err := fsDir.checkOwnedByMe(); err != nil {
 		return nil, err
 	}
-	lastObjectID, err := fsDir.getLastObjectID()
-	if err != nil {
-		return nil, err
-	}
-	fsDir.lastObjectID = max(lastObjectID, 1)
 	return &fsDir, nil
 }
 
@@ -52,17 +48,15 @@ func (dr *FSDir) Close() error {
 	return dr.releaseOwnership()
 }
 
-func (dr *FSDir) Create(data Blob) (ID, error) {
+func (dr *FSDir) Create(data Blob, objectID ID) error {
 	if err := dr.checkOwnedByMe(); err != nil {
-		return 0, err
+		return err
 	}
-	objectID := dr.lastObjectID + 1
 	err := dr.Save(objectID, data)
 	if err != nil {
-		return NullID, err
+		return err
 	}
-	dr.lastObjectID = objectID
-	return dr.lastObjectID, nil
+	return nil
 }
 
 func (dr *FSDir) LoadAll() ([]Item, error) {
@@ -85,16 +79,12 @@ func (dr *FSDir) LoadAll() ([]Item, error) {
 		if strings.HasPrefix(fName, ".") {
 			return nil // ignore
 		}
-		objectID, cerr := strconv.Atoi(fName)
-		if cerr != nil {
-			return ErrCorruptedContent{Name: path}
-		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return ErrCorruptedContent{Name: path}
 		}
 		items = append(items, Item{
-			ID:   ID(objectID),
+			ID:   ID(fName),
 			Blob: Blob(data),
 		})
 		return nil
@@ -106,7 +96,7 @@ func (dr *FSDir) Load(id ID) (Blob, error) {
 	if err := dr.checkOwnedByMe(); err != nil {
 		return nil, err
 	}
-	objPath := filepath.Join(dr.fsPath, strconv.FormatInt(int64(id), 10))
+	objPath := filepath.Join(dr.fsPath, string(id))
 	data, err := os.ReadFile(objPath)
 	if os.IsNotExist(err) {
 		return nil, ErrNotFound{ID: id}
@@ -118,7 +108,7 @@ func (dr *FSDir) Save(id ID, blob Blob) error {
 	if err := dr.checkOwnedByMe(); err != nil {
 		return err
 	}
-	objPath := filepath.Join(dr.fsPath, strconv.FormatInt(int64(id), 10))
+	objPath := filepath.Join(dr.fsPath, string(id))
 	return os.WriteFile(objPath, blob, 0644)
 }
 
@@ -126,36 +116,8 @@ func (dr *FSDir) Delete(id ID) error {
 	if err := dr.checkOwnedByMe(); err != nil {
 		return err
 	}
-	objPath := filepath.Join(dr.fsPath, strconv.FormatInt(int64(id), 10))
+	objPath := filepath.Join(dr.fsPath, string(id))
 	return os.Remove(objPath)
-}
-
-// getLastObjectID scans the directory content to find the last (highest) used ID,
-// in order to determine the next free one to use
-func (dr *FSDir) getLastObjectID() (ID, error) {
-	var lastObjectID ID
-	rerr := filepath.WalkDir(dr.fsPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return ErrCorruptedContent{Name: path}
-		}
-		fName := filepath.Base(path)
-		if fName == lockFile {
-			return nil // treat explicitely our metadata
-		}
-		if strings.HasPrefix(fName, ".") {
-			return nil // ignore
-		}
-		objectID, cerr := strconv.Atoi(fName)
-		if cerr != nil {
-			return ErrCorruptedContent{Name: path}
-		}
-		lastObjectID = max(ID(objectID), lastObjectID)
-		return nil
-	})
-	return lastObjectID, rerr
 }
 
 // getOwner returns the process (by its PID) currently owning the datastore

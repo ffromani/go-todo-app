@@ -2,6 +2,8 @@ package store
 
 type Redis struct{}
 
+var _ Storage = &Redis{}
+
 func NewRedis() (*Redis, error) {
 	return nil, nil
 }
@@ -10,8 +12,8 @@ func (rd *Redis) Close() error {
 	return nil
 }
 
-func (rd *Redis) Create(data Blob) (ID, error) {
-	return NullID, nil
+func (rd *Redis) Create(data Blob, id ID) error {
+	return nil
 }
 
 func (rd *Redis) LoadAll() ([]Item, error) {

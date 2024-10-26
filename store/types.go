@@ -5,13 +5,22 @@ import "fmt"
 // ID is an opaque value which uniquely identifies a Todo. Can only be compared for equality
 // Note: this incidentally is 1:1 with API objects, but this is an implementation
 // detail rather than a requirement
-type ID int64
+type ID string
 type Blob []byte
 
 const (
 	// NullID represents a invalid ID
-	NullID ID = 0
+	NullID ID = ""
 )
+
+type Storage interface {
+	Close() error
+	Create(Blob, ID) error
+	LoadAll() ([]Item, error)
+	Load(id ID) (Blob, error)
+	Save(id ID, blob Blob) error
+	Delete(id ID) error
+}
 
 // Item binds a Todo with its ID identifier
 // Note: this incidentally is 1:1 with API objects, but this is an implementation

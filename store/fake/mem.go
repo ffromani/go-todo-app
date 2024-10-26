@@ -5,16 +5,16 @@ import (
 )
 
 type Mem struct {
-	Blobs        map[store.ID]store.Blob
-	LastObjectID store.ID
-	Error        error
-	Generate     func() (store.Item, bool, error)
+	Blobs    map[store.ID]store.Blob
+	Error    error
+	Generate func() (store.Item, bool, error)
 }
+
+var _ store.Storage = &Mem{}
 
 func NewMem() (*Mem, error) {
 	return &Mem{
-		Blobs:        make(map[store.ID]store.Blob),
-		LastObjectID: 0,
+		Blobs: make(map[store.ID]store.Blob),
 		Generate: func() (store.Item, bool, error) {
 			return store.Item{}, true, nil
 		},
@@ -25,15 +25,12 @@ func (mm *Mem) Close() error {
 	return mm.Error
 }
 
-func (mm *Mem) Create(data store.Blob) (store.ID, error) {
+func (mm *Mem) Create(data store.Blob, objectID store.ID) error {
 	if mm.Error != nil {
-		return store.NullID, mm.Error
+		return mm.Error
 	}
-	objectID := mm.LastObjectID + 1
 	mm.Blobs[objectID] = data
-	mm.LastObjectID = objectID
-	return objectID, nil
-
+	return nil
 }
 
 func (mm *Mem) LoadAll() ([]store.Item, error) {
