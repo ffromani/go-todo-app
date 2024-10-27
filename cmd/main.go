@@ -8,17 +8,26 @@ import (
 	"github.com/ffromani/go-todo-app/config"
 	"github.com/ffromani/go-todo-app/controller"
 	"github.com/ffromani/go-todo-app/ledger"
+	"github.com/ffromani/go-todo-app/store"
 	"github.com/ffromani/go-todo-app/store/fake"
 )
 
 func main() {
-	cfg, err := config.FromFlags(os.Args...)
+	cfg, err := config.FromFlags(os.Args[1:]...)
 	if err != nil {
 		log.Printf("error parsing flags: %v", err)
+		os.Exit(0)
 	}
 	log.Printf("ready: configuration:\n%s", cfg.String())
 
-	st, err := fake.NewMem()
+	var st store.Storage
+	if cfg.Redis.URL != "" {
+		log.Printf("store: using backend \"redis\"")
+		st, err = store.NewRedis(cfg.Redis.URL, cfg.Redis.Password, cfg.Redis.Database)
+	} else {
+		log.Printf("store: using backend \"fake\"")
+		st, err = fake.NewMem()
+	}
 	if err != nil {
 		log.Printf("error creating store backend: %v", err)
 	}

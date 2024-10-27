@@ -13,12 +13,12 @@ type Redis struct {
 	rdb *redis.Client
 }
 
-func NewRedis(url, password string) (*Redis, error) {
+func NewRedis(url, password string, db int) (*Redis, error) {
 	return &Redis{
 		rdb: redis.NewClient(&redis.Options{
 			Addr:     url,
 			Password: password,
-			DB:       0, // use default DB
+			DB:       db,
 		}),
 	}, nil
 }
