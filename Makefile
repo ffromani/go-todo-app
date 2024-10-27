@@ -16,3 +16,6 @@ coverage.out: test-unit
 
 cover-view: coverage.out
 	go tool cover -html=coverage.out
+
+test-e2e:
+	ginkgo -v ./e2e/...
