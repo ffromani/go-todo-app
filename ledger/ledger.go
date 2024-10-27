@@ -123,7 +123,11 @@ func (ld *Ledger) Set(id store.ID, todo model.Todo) (rerr error) {
 	log.Printf("ledger: Set: updating object %v (%d bytes)", id, len(blob))
 	curBlob, found := ld.blobs[id]
 	if !found {
-		return ErrNotFound
+		ld.blobs[id] = blob
+		log.Printf("ledger: Set: created cache object %v (%d bytes)", id, len(blob))
+		rerr = ld.storer.Create(id, blob)
+		log.Printf("ledger: Set: created store object %v err=%v", id, err)
+		return rerr
 	}
 	// rollback
 	defer func() {
