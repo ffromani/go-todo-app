@@ -2,7 +2,6 @@ package uuid_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +12,7 @@ import (
 // exercise
 func TestUUID(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode([]string{"uuid"})
+		json.NewEncoder(w).Encode([]string{"myuuid"})
 	}))
 
 	t.Cleanup(svr.Close)
@@ -22,5 +21,7 @@ func TestUUID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("did not expect an error, got %v", err)
 	}
-	fmt.Printf("TODO find a way to verify the uuid", uuid)
+	if uuid != "myuuid" {
+		t.Fatalf("expecting myuuid, got %s", uuid)
+	}
 }
