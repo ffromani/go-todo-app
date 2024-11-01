@@ -28,7 +28,15 @@ func (rd *Redis) Close() error {
 }
 
 func (rd *Redis) Create(objectID ID, data Blob) error {
-	err := rd.rdb.Set(context.Background(), string(objectID), data, 0).Err()
+	_, err := rd.rdb.Get(context.Background(), string(objectID)).Result()
+	if err != nil && err != redis.Nil {
+		return err
+	}
+	if err != redis.Nil { // The item is already there
+		return fmt.Errorf("item with id %v already exists", objectID)
+	}
+
+	err = rd.rdb.Set(context.Background(), string(objectID), data, 0).Err()
 	if err != nil {
 		return err
 	}
@@ -73,5 +81,16 @@ func (rd *Redis) Save(objectID ID, blob Blob) error {
 }
 
 func (rd *Redis) Delete(objectID ID) error {
+	// Non thread safe!
+	data, err := rd.rdb.Del(context.Background(), string(objectID)).Result()
+	if err == redis.Nil {
+		return fmt.Errorf("id %s does not exist", objectID)
+	}
+
+	err = rd.rdb.Set(context.Background(), string(objectID), data, 0).Err()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

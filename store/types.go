@@ -8,6 +8,10 @@ import "fmt"
 type ID string
 type Blob []byte
 
+func (b Blob) MarshalBinary() ([]byte, error) {
+	return b, nil
+}
+
 const (
 	// NullID represents a invalid ID
 	NullID ID = ""
