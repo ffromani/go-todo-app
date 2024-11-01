@@ -3,6 +3,17 @@
 Note: there are some failing tests around that need to be fixed. We suggest running only the test that is
 part of the exercise by running `go test -run TestName` in order to avoid unnecessary noise.
 
+## Basics and coverage
+
+- Write one or more (the more the better) unit tests. If unsure where to start: `api/v1` or `config` can be quite simple;
+  for more complex scenarios: `middleware`.
+- Check the coverage before/after the tests. You can use the `make cover-vew` makefile target.
+- Write one or more integration tests, e.g. tests which involve two or more packages. If unsure where to start: `ledger`
+  is probably the simplest case, `controller` provides more (and more complex) opportunities.
+- Check how the converage changed before/after the integration tests.
+- Compile the test binaries, and then run them.
+
+
 ## Subtests / Table tests
 
 - Modify the `TestMerge` test under [model/todo_merge_test.go](model/todo_merge_test.go) to be a table based
@@ -40,6 +51,26 @@ benchstat withstrings.txt withreader.txt
 ```
 
 Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking](https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking)
+
+## Enhancing go testing
+
+- Integrate `go-cmp` in the tests used previously. Make sure to use `cmp.Diff` and `cmp.Equal` Good candidates can be tests for `model` or for `api/v1` (`go get github.com/google/go-cmp`)
+- Rewrite existing unit tests to use `testify/assert` (`go get github.com/stretchr/testify`)
+
+## Using ginkgo
+
+- Bootstrap a ginkgo suite:
+```
+go install github.com/onsi/ginkgo/v2/ginkgo
+go get github.com/onsi/gomega/
+go mod tidy
+mkdir e2e && cd e2e
+ginkgo bootstrap .
+```
+- Run tests using ginkgo: `ginkgo -v ./e2e/...`
+- Write and run one or more e2e tests using ginkgo. You can either assume the `go-todo-app` is running, or run it as part of the test suite. Evaluate the pros and cons of each approach.
+- Integrate gingko custom matcher in the e2e test(s) you wrote
+- Compile the e2e test binary which uses ginkgo, and run it
 
 ## Dependency injection
 
