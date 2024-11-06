@@ -10,7 +10,7 @@ type UUIDGenerator struct {
 	url string
 }
 
-const uuidURL = "https://www.uuidtools.com/api/generate/v1/"
+var uuidURL = "https://www.uuidtools.com/api/generate/v1/"
 
 func New() UUIDGenerator {
 	return UUIDGenerator{url: uuidURL}
