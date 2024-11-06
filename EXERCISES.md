@@ -36,22 +36,6 @@ Examples: [Sub tests and table tests examples](https://github.com/fedepaol/gotes
 
 Examples: [Fixtures and golden files examples](https://github.com/fedepaol/gotestbootcamp/tree/main/fixturesandgoldenfiles)
 
-## Benchmarking
-
-- Run the benchmark test under [controller/controller_bench_test.go](controller/controller_bench_test.go) with `go test -run xx -bench . -benchmem` (note the run xx to avoid running the tests too).
-- Replace the implementation being instrumented the the one using a Reader (`todoFromRequestReader`) and benchmark again
-- Install benchstat with `go install golang.org/x/perf/cmd/benchstat@latest`
-- Validate the difference between the two approaches:
-
-```bash
-go test -run xx -bench . -benchmem -count 10 > withreader.txt
-# replace the implementation back
-go test -run xx -bench . -benchmem -count 10 > withstrings.txt
-benchstat withstrings.txt withreader.txt
-```
-
-Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking](https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking)
-
 ## Enhancing go testing
 
 - Integrate `go-cmp` in the tests used previously. Make sure to use `cmp.Diff` and `cmp.Equal` Good candidates can be tests for `model` or for `api/v1` (`go get github.com/google/go-cmp`)
@@ -105,3 +89,18 @@ Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/httpserver]
 - Fill the emtpy tests
 - Add more tests 
 
+## Benchmarking
+
+- Run the benchmark test under [controller/controller_bench_test.go](controller/controller_bench_test.go) with `go test -run xx -bench . -benchmem` (note the run xx to avoid running the tests too).
+- Replace the implementation being instrumented the the one using a Reader (`todoFromRequestReader`) and benchmark again
+- Install benchstat with `go install golang.org/x/perf/cmd/benchstat@latest`
+- Validate the difference between the two approaches:
+
+```bash
+go test -run xx -bench . -benchmem -count 10 > withreader.txt
+# replace the implementation back
+go test -run xx -bench . -benchmem -count 10 > withstrings.txt
+benchstat withstrings.txt withreader.txt
+```
+
+Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking](https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking)
