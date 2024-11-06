@@ -2,14 +2,11 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
-
-// exercise
 
 func TestWithRedis(t *testing.T) {
 	req := testcontainers.ContainerRequest{
@@ -33,10 +30,37 @@ func TestWithRedis(t *testing.T) {
 	}
 
 	t.Run("test create and get", func(t *testing.T) {
-		fmt.Println("TODO add a test where we create an item and we verify it", storage)
+		id := ID("foo")
+		data := []byte("bar")
+
+		err := storage.Create(id, data)
+		if err != nil {
+			t.Fatal("got error while creating", err)
+		}
+		retrieved, err := storage.Load(id)
+		if err != nil {
+			t.Fatal("got error while loading", err)
+		}
+		if string(retrieved) != "bar" {
+			t.Fatalf("expecting bar, got %s", retrieved)
+		}
 	})
 
 	t.Run("test duplicateid fails", func(t *testing.T) {
-		fmt.Println("TODO add a test where we create a duplicate id fails", storage)
+		id := ID("toDupe")
+		data := []byte("bar")
+
+		err := storage.Create(id, data)
+		if err != nil {
+			t.Fatal("got error while creating", err)
+		}
+
+		id1 := ID("toDupe")
+		data1 := []byte("foo")
+
+		err = storage.Create(id1, data1)
+		if err == nil {
+			t.Fatal("expecting error got nil")
+		}
 	})
 }
