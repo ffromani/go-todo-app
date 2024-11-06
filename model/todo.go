@@ -72,23 +72,14 @@ func NewFromAPIv1(apiTodo apiv1.Todo) Todo {
 	}
 }
 
+var now = time.Now
+
 // New creates a new Todo with the given title and with sane defaults
 func New(title string) Todo {
 	return Todo{
 		Title:          title,
 		Status:         apiv1.Pending,
-		LastUpdateTime: time.Now(),
-	}
-}
-
-var timeNow = time.Now
-
-// New creates a new Todo with the given title and with sane defaults
-func NewDep(title string) Todo {
-	return Todo{
-		Title:          title,
-		Status:         apiv1.Pending,
-		LastUpdateTime: timeNow(),
+		LastUpdateTime: now(),
 	}
 }
 
