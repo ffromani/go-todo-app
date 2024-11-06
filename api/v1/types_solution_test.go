@@ -11,7 +11,7 @@ import (
 )
 
 // this is not sufficient to ensure full coverage, yet:
-// ok  	github.com/ffromani/go-todo-app/api/v1	0.009s	coverage: 100.0% of statements
+// ok  	github.com/gotestbootcamp/go-todo-app/api/v1	0.009s	coverage: 100.0% of statements
 func TestJSONRoundtrip(t *testing.T) {
 	type testCase struct {
 		name string

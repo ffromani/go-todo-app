@@ -1,4 +1,4 @@
-module github.com/ffromani/go-todo-app
+module github.com/gotestbootcamp/go-todo-app
 
 go 1.22.7
 

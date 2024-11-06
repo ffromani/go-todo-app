@@ -1,7 +1,7 @@
 package fake
 
 import (
-	"github.com/ffromani/go-todo-app/store"
+	"github.com/gotestbootcamp/go-todo-app/store"
 )
 
 type Mem struct {

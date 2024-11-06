@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	apiv1 "github.com/ffromani/go-todo-app/api/v1"
-	"github.com/ffromani/go-todo-app/model"
+	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
+	"github.com/gotestbootcamp/go-todo-app/model"
 )
 
 var update = flag.Bool("update", false, "update .golden.json files")

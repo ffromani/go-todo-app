@@ -4,9 +4,9 @@ import (
 	"errors"
 	"log"
 
-	apiv1 "github.com/ffromani/go-todo-app/api/v1"
-	"github.com/ffromani/go-todo-app/model"
-	"github.com/ffromani/go-todo-app/store"
+	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
+	"github.com/gotestbootcamp/go-todo-app/model"
+	"github.com/gotestbootcamp/go-todo-app/store"
 )
 
 var (

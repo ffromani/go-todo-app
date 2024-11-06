@@ -7,10 +7,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	apiv1 "github.com/ffromani/go-todo-app/api/v1"
-	"github.com/ffromani/go-todo-app/ledger"
-	"github.com/ffromani/go-todo-app/middleware"
-	"github.com/ffromani/go-todo-app/uuid"
+	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
+	"github.com/gotestbootcamp/go-todo-app/ledger"
+	"github.com/gotestbootcamp/go-todo-app/middleware"
+	"github.com/gotestbootcamp/go-todo-app/uuid"
 )
 
 type Controller struct {

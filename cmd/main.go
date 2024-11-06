@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/ffromani/go-todo-app/config"
-	"github.com/ffromani/go-todo-app/controller"
-	"github.com/ffromani/go-todo-app/ledger"
-	"github.com/ffromani/go-todo-app/store"
-	"github.com/ffromani/go-todo-app/store/fake"
+	"github.com/gotestbootcamp/go-todo-app/config"
+	"github.com/gotestbootcamp/go-todo-app/controller"
+	"github.com/gotestbootcamp/go-todo-app/ledger"
+	"github.com/gotestbootcamp/go-todo-app/store"
+	"github.com/gotestbootcamp/go-todo-app/store/fake"
 )
 
 func main() {

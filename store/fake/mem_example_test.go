@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ffromani/go-todo-app/store"
+	"github.com/gotestbootcamp/go-todo-app/store"
 	"github.com/stretchr/testify/assert"
 )
 

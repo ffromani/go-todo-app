@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ffromani/go-todo-app/model"
+	"github.com/gotestbootcamp/go-todo-app/model"
 )
 
 // exercise

@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ffromani/go-todo-app/uuid"
+	"github.com/gotestbootcamp/go-todo-app/uuid"
 )
 
 // exercise

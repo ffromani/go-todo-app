@@ -13,8 +13,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	apiv1 "github.com/ffromani/go-todo-app/api/v1"
-	"github.com/ffromani/go-todo-app/model"
+	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
+	"github.com/gotestbootcamp/go-todo-app/model"
 )
 
 const (

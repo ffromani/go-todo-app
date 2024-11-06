@@ -8,11 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	apiv1 "github.com/ffromani/go-todo-app/api/v1"
-	"github.com/ffromani/go-todo-app/controller"
-	"github.com/ffromani/go-todo-app/ledger"
-	"github.com/ffromani/go-todo-app/model"
-	"github.com/ffromani/go-todo-app/store/fake"
+	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
+	"github.com/gotestbootcamp/go-todo-app/controller"
+	"github.com/gotestbootcamp/go-todo-app/ledger"
+	"github.com/gotestbootcamp/go-todo-app/model"
+	"github.com/gotestbootcamp/go-todo-app/store/fake"
 )
 
 // exercise

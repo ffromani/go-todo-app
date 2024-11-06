@@ -8,7 +8,7 @@ import (
 	"html/template"
 	"time"
 
-	apiv1 "github.com/ffromani/go-todo-app/api/v1"
+	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
 )
 
 var (

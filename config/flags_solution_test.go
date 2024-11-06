@@ -10,7 +10,7 @@ import (
 )
 
 // this is not sufficient to ensure full coverage, yet:
-// ok  	github.com/ffromani/go-todo-app/config	0.008s	coverage: 100.0% of statements
+// ok  	github.com/gotestbootcamp/go-todo-app/config	0.008s	coverage: 100.0% of statements
 func TestFromFlags(t *testing.T) {
 	type testCase struct {
 		name        string
