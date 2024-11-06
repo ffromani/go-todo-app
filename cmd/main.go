@@ -10,6 +10,7 @@ import (
 	"github.com/gotestbootcamp/go-todo-app/ledger"
 	"github.com/gotestbootcamp/go-todo-app/store"
 	"github.com/gotestbootcamp/go-todo-app/store/fake"
+	"github.com/gotestbootcamp/go-todo-app/uuid"
 )
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 	}
 	log.Printf("ready: data ledger")
 
-	ctrl := controller.New(ldg)
+	ctrl := controller.New(ldg, uuid.New())
 	log.Printf("ready: controller")
 
 	log.Printf("start serving on address %q", cfg.Address)

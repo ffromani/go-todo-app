@@ -16,6 +16,7 @@ import (
 	"github.com/gotestbootcamp/go-todo-app/model"
 	"github.com/gotestbootcamp/go-todo-app/store"
 	"github.com/gotestbootcamp/go-todo-app/store/fake"
+	"github.com/gotestbootcamp/go-todo-app/uuid"
 )
 
 // solution:part1
@@ -52,7 +53,7 @@ func TestBacklogIndex(t *testing.T) {
 	req := httptest.NewRequest("GET", "/backlog", strings.NewReader("{}"))
 	rec := httptest.NewRecorder()
 
-	hndl := New(ld)
+	hndl := New(ld, uuid.New())
 	hndl.ServeHTTP(rec, req)
 
 	res := rec.Body.String()

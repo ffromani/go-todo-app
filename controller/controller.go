@@ -10,13 +10,12 @@ import (
 	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
 	"github.com/gotestbootcamp/go-todo-app/ledger"
 	"github.com/gotestbootcamp/go-todo-app/middleware"
-	"github.com/gotestbootcamp/go-todo-app/uuid"
 )
 
 type Controller struct {
 	router  *mux.Router
 	ld      *ledger.Ledger
-	uuidGen uuid.UUIDGenerator
+	uuidGen UUIDer
 }
 
 type Route struct {
@@ -26,10 +25,14 @@ type Route struct {
 	Handler http.HandlerFunc
 }
 
-func New(ld *ledger.Ledger) http.Handler {
+type UUIDer interface {
+	NewUUID() (string, error)
+}
+
+func New(ld *ledger.Ledger, uuid UUIDer) http.Handler {
 	ctrl := Controller{
 		ld:      ld,
-		uuidGen: uuid.New(),
+		uuidGen: uuid,
 		router:  mux.NewRouter().StrictSlash(true),
 	}
 	routes := []Route{

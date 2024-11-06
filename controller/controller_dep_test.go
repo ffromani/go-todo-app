@@ -3,6 +3,7 @@ package controller_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -15,10 +16,23 @@ import (
 	"github.com/gotestbootcamp/go-todo-app/store/fake"
 )
 
-// exercise
+type mockUUID struct {
+	uuid      string
+	shouldErr bool
+}
+
+func (m mockUUID) NewUUID() (string, error) {
+	if m.shouldErr {
+		return "", fmt.Errorf("error")
+	}
+	return m.uuid, nil
+}
+
+var _ controller.UUIDer = mockUUID{}
 
 func TestTodoCreate(t *testing.T) {
-	handler := controller.New(memoryStorage())
+	uuid := mockUUID{uuid: "1234"}
+	handler := controller.New(memoryStorage(), uuid)
 
 	t.Run("test post", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/todos", bodyFromTodo(model.Todo{Title: "foo", Assignee: "fede", Description: "todo"}))
@@ -37,7 +51,31 @@ func TestTodoCreate(t *testing.T) {
 			t.Fatalf("expecting one item back")
 		}
 
-		// TODO validate uuid
+		if apiRes.Result.Items[0].ID != "1234" {
+			t.Fatalf("expecting id 1234 got %s", apiRes.Result.Items[0].ID)
+		}
+	})
+
+	t.Run("test post should fail when uuid fails", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/todos", bodyFromTodo(model.Todo{Title: "foo", Assignee: "fede", Description: "todo"}))
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, req)
+
+		res := w.Result()
+		defer res.Body.Close()
+		apiRes := &apiv1.Response{}
+		err := json.NewDecoder(res.Body).Decode(&apiRes)
+		if err != nil {
+			t.Fatalf("expected error to be nil got %v", err)
+		}
+
+		if len(apiRes.Result.Items) != 1 {
+			t.Fatalf("expecting one item back")
+		}
+
+		if apiRes.Result.Items[0].ID != "1234" {
+			t.Fatalf("expecting id 1234 got %s", apiRes.Result.Items[0].ID)
+		}
 	})
 }
 
