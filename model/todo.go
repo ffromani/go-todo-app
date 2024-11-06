@@ -81,17 +81,6 @@ func New(title string) Todo {
 	}
 }
 
-var timeNow = time.Now
-
-// New creates a new Todo with the given title and with sane defaults
-func NewDep(title string) Todo {
-	return Todo{
-		Title:          title,
-		Status:         apiv1.Pending,
-		LastUpdateTime: timeNow(),
-	}
-}
-
 // IsOngoing returns true if the todo object is processable.
 // In turn, an object is processable if not in a final state.
 // An object in final state is terminated and can't be manipulated anymore
