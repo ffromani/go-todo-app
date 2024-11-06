@@ -26,8 +26,8 @@ func BenchmarkTodoFromRequest(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, _ = body.Seek(0, io.SeekStart)
 		req := httptest.NewRequest(http.MethodGet, "/foo", body)
-		_, code, err := todoFromRequest(req)
-		// _, code, err := todoFromRequestReader(req)
+		//_, code, err := todoFromRequest(req)
+		_, code, err := todoFromRequestReader(req)
 		if err != nil {
 			b.Fatal("error", err)
 		}

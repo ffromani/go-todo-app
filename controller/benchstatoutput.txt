@@ -1,0 +1,15 @@
+goos: linux
+goarch: amd64
+pkg: github.com/gotestbootcamp/go-todo-app/controller
+cpu: Intel(R) Core(TM) i7-10850H CPU @ 2.70GHz
+                   │ withstrings.txt │            withreader.txt            │
+                   │     sec/op      │    sec/op     vs base                │
+TodoFromRequest-12      4.224µ ± 13%   3.683µ ± 11%  -12.82% (p=0.043 n=10)
+
+                   │ withstrings.txt │           withreader.txt            │
+                   │      B/op       │     B/op      vs base               │
+TodoFromRequest-12      6.237Ki ± 0%   5.667Ki ± 0%  -9.14% (p=0.000 n=10)
+
+                   │ withstrings.txt │           withreader.txt           │
+                   │    allocs/op    │ allocs/op   vs base                │
+TodoFromRequest-12        23.00 ± 0%   20.00 ± 0%  -13.04% (p=0.000 n=10)

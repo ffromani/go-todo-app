@@ -25,10 +25,28 @@ func TestRender(t *testing.T) {
 		{
 			name: "non assigned",
 			toRender: model.Todo{
-				Title:       "todo2",
+				Title:       "unassigned",
 				Assignee:    "",
 				Description: "second todo",
 				Status:      apiv1.Pending,
+			},
+		},
+		{
+			name: "assigned",
+			toRender: model.Todo{
+				Title:       "todo assigned",
+				Assignee:    "foo",
+				Description: "second todo",
+				Status:      apiv1.Assigned,
+			},
+		},
+		{
+			name: "completed",
+			toRender: model.Todo{
+				Title:       "todo assigned",
+				Assignee:    "foo",
+				Description: "second todo",
+				Status:      apiv1.Completed,
 			},
 		},
 	}
