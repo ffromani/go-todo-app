@@ -76,6 +76,7 @@ Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/dependency_
 
 ## Integration with Http servers
 
+- Check the [uuid/uuid_test.go](uuid/uuid_test.go) and see why it fails
 - Modify the code so that the result of [uuid/uuid_test.go](uuid/uuid_test.go) is deterministic.
 - Change the test so that:
     - it verifies that the endpoint is called only once per `NewUUID` call

@@ -9,7 +9,6 @@ import (
 	"github.com/gotestbootcamp/go-todo-app/uuid"
 )
 
-// exercise
 func TestUUID(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode([]string{"myuuid"})
