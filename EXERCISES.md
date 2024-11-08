@@ -10,7 +10,7 @@ part of the exercise by running `go test -run TestName` in order to avoid unnece
 - Check the coverage before/after the tests. You can use the `make cover-vew` makefile target.
 - Write one or more integration tests, e.g. tests which involve two or more packages. If unsure where to start: `ledger`
   is probably the simplest case, `controller` provides more (and more complex) opportunities.
-- Check how the converage changed before/after the integration tests.
+- Check how the coverage changed before/after the integration tests.
 - Compile the test binaries, and then run them.
 
 
@@ -35,11 +35,6 @@ Examples: [Sub tests and table tests examples](https://github.com/fedepaol/gotes
 - Extend the tests and verify the generated files are valid
 
 Examples: [Fixtures and golden files examples](https://github.com/fedepaol/gotestbootcamp/tree/main/fixturesandgoldenfiles)
-
-## Enhancing go testing
-
-- Integrate `go-cmp` in the tests used previously. Make sure to use `cmp.Diff` and `cmp.Equal` Good candidates can be tests for `model` or for `api/v1` (`go get github.com/google/go-cmp`)
-- Rewrite existing unit tests to use `testify/assert` (`go get github.com/stretchr/testify`)
 
 ## Using ginkgo
 
@@ -89,6 +84,8 @@ Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/httpserver]
 - Fill the emtpy tests
 - Add more tests 
 
+# Extras / Stretch goals
+
 ## Benchmarking
 
 - Run the benchmark test under [controller/controller_bench_test.go](controller/controller_bench_test.go) with `go test -run xx -bench . -benchmem` (note the run xx to avoid running the tests too).
@@ -104,3 +101,10 @@ benchstat withstrings.txt withreader.txt
 ```
 
 Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking](https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarking)
+
+## Enhancing go testing
+
+- Integrate `go-cmp` in the tests used previously. Make sure to use `cmp.Diff` and `cmp.Equal` Good candidates can be tests for `model` or for `api/v1` (`go get github.com/google/go-cmp`)
+- Rewrite existing unit tests to use `testify/assert` (`go get github.com/stretchr/testify`)
+
+
