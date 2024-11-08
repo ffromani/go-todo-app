@@ -3,6 +3,8 @@
 Note: there are some failing tests around that need to be fixed. We suggest running only the test that is
 part of the exercise by running `go test -run TestName` in order to avoid unnecessary noise.
 
+Note: there are not universal solutions. The proposed one are illustrative. There are many possible correct solutions.
+
 ## Basics and coverage
 
 - Write one or more (the more the better) unit tests. If unsure where to start: `api/v1` or `config` can be quite simple;
@@ -12,6 +14,8 @@ part of the exercise by running `go test -run TestName` in order to avoid unnece
   is probably the simplest case, `controller` provides more (and more complex) opportunities.
 - Check how the coverage changed before/after the integration tests.
 - Compile the test binaries, and then run them.
+
+Solutions: please checkout the `part1_solution` branch and `git grep solution:part1`
 
 
 ## Subtests / Table tests
@@ -50,6 +54,8 @@ ginkgo bootstrap .
 - Write and run one or more e2e tests using ginkgo. You can either assume the `go-todo-app` is running, or run it as part of the test suite. Evaluate the pros and cons of each approach.
 - Integrate gingko custom matcher in the e2e test(s) you wrote
 - Compile the e2e test binary which uses ginkgo, and run it
+
+Solutions: please checkout the `part3_solution` branch and `git grep solution:part3`
 
 ## Dependency injection
 
