@@ -9,6 +9,13 @@ import (
 )
 
 func TestMergeTable(t *testing.T) {
+	// Setup code
+	toMerge := model.Todo{
+		Title:       "todo1",
+		Assignee:    "",
+		Description: "first todo",
+		Status:      apiv1.Pending,
+	}
 
 	tests := []struct {
 		name      string
@@ -59,13 +66,6 @@ func TestMergeTable(t *testing.T) {
 			expected:  model.Todo{},
 			shouldErr: true,
 		},
-	}
-
-	toMerge := model.Todo{
-		Title:       "todo1",
-		Assignee:    "",
-		Description: "first todo",
-		Status:      apiv1.Pending,
 	}
 
 	for _, tc := range tests {
