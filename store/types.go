@@ -38,14 +38,32 @@ type ErrNotFound struct {
 	ID ID
 }
 
+func (e ErrNotFound) Is(err error) bool {
+	_, ok := err.(ErrNotFound)
+	return ok
+}
+
 func (e ErrNotFound) Error() string {
 	return fmt.Sprintf("unknown id: %v", e.ID)
 }
 
 type ErrCorruptedContent struct {
-	Name string
+	Name     string
+	IntError error
+}
+
+func (e ErrCorruptedContent) Is(err error) bool {
+	_, ok := err.(ErrCorruptedContent)
+	return ok
+}
+
+func (e ErrCorruptedContent) Unwrap() error {
+	return e.IntError
 }
 
 func (e ErrCorruptedContent) Error() string {
+	if e.IntError != nil {
+		return fmt.Sprintf("corrupted content: %q: %v", e.Name, e.IntError)
+	}
 	return fmt.Sprintf("corrupted content: %q", e.Name)
 }

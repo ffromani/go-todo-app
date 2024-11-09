@@ -12,11 +12,17 @@ type RedisConfig struct {
 	Database int
 }
 
+// FSDirConfig holds all the fsdir store-related tunables
+type FSDirConfig struct {
+	Path string
+}
+
 // Config holds all the tunables
 type Config struct {
 	// Address is in the format `[host]:port`
 	Address string
 	Redis   RedisConfig
+	FSDir   FSDirConfig
 }
 
 func (cfg Config) String() string {
@@ -26,6 +32,8 @@ func (cfg Config) String() string {
 	fmt.Fprintf(&sb, "  - url:  %q\n", cfg.Redis.URL)
 	fmt.Fprintf(&sb, "  - pass: %q\n", cfg.Redis.Password)
 	fmt.Fprintf(&sb, "  - db:   %d\n", cfg.Redis.Database)
+	fmt.Fprintf(&sb, "- fsdir:\n")
+	fmt.Fprintf(&sb, "  - path:  %q\n", cfg.FSDir.Path)
 	return sb.String()
 }
 
@@ -34,5 +42,6 @@ func Defaults() Config {
 	return Config{
 		Address: "localhost:8181",
 		Redis:   RedisConfig{},
+		FSDir:   FSDirConfig{},
 	}
 }

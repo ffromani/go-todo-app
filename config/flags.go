@@ -17,6 +17,7 @@ func FromFlags(args ...string) (Config, error) {
 	flags.StringVar(&conf.Redis.URL, "redis-url", conf.Redis.URL, "redis URL")
 	flags.StringVar(&conf.Redis.Password, "redis-password", conf.Redis.Password, "redis password")
 	flags.IntVar(&conf.Redis.Database, "redis-database", conf.Redis.Database, "redis database index")
+	flags.StringVar(&conf.FSDir.Path, "fsdir-path", conf.FSDir.Path, "filesystem directory store path")
 
 	flags.Usage = func() {
 		w := flags.Output()

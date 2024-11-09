@@ -22,8 +22,11 @@ func main() {
 
 	var st store.Storage
 	if cfg.Redis.URL != "" {
-		log.Printf("store: using backend \"redis\"")
+		log.Printf("store: using backend: redis")
 		st, err = store.NewRedis(cfg.Redis.URL, cfg.Redis.Password, cfg.Redis.Database)
+	} else if cfg.FSDir.Path != "" {
+		log.Printf("store: using backend: fsdir")
+		st, err = store.NewFSDir(cfg.FSDir.Path)
 	} else {
 		log.Printf("store: using backend \"fake\"")
 		st, err = fake.NewMem()
