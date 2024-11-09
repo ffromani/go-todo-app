@@ -1,6 +1,6 @@
 package config
 
-// example
+// solution:part1
 
 import (
 	"testing"
