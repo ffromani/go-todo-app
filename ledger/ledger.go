@@ -65,6 +65,7 @@ func New(storer store.Storage) (*Ledger, error) {
 	for _, item := range items {
 		ld.blobs[item.ID] = item.Blob
 	}
+	log.Printf("ledger: loaded %d blobs", len(ld.blobs))
 	return &ld, nil
 
 }
@@ -79,6 +80,7 @@ func (ld *Ledger) Close() error {
 // must be ignored.
 func (ld *Ledger) Filter(wants Wants) (Items, error) {
 	var items []Item
+	log.Printf("ledger: Filter: scanning %d blobs", len(ld.blobs))
 	for id, blob := range ld.blobs {
 		todo, err := model.DeserializeTodo(blob)
 		if err != nil {
@@ -106,6 +108,7 @@ func (ld *Ledger) Get(id store.ID) (model.Todo, error) {
 	if err != nil {
 		return model.Todo{}, err
 	}
+	log.Printf("ledger: Set: retrieved from cache object %v: %s", id, todo.String())
 	return todo, nil
 }
 
@@ -115,16 +118,17 @@ func (ld *Ledger) Set(id store.ID, todo model.Todo) (rerr error) {
 	if err != nil {
 		return err
 	}
+	log.Printf("ledger: Set: %s (blob=%d bytes)", todo.String(), len(blob))
 
 	if id == store.NullID {
 		return errors.New("can't set null id")
 	}
 
-	log.Printf("ledger: Set: updating object %v (%d bytes)", id, len(blob))
+	log.Printf("ledger: Set: updating object %v", id)
 	curBlob, found := ld.blobs[id]
 	if !found {
 		ld.blobs[id] = blob
-		log.Printf("ledger: Set: created cache object %v (%d bytes)", id, len(blob))
+		log.Printf("ledger: Set: created cache object %v", id)
 		rerr = ld.storer.Create(id, blob)
 		log.Printf("ledger: Set: created store object %v err=%v", id, err)
 		return rerr
@@ -138,7 +142,7 @@ func (ld *Ledger) Set(id store.ID, todo model.Todo) (rerr error) {
 		ld.blobs[id] = curBlob
 	}()
 	ld.blobs[id] = blob
-	log.Printf("ledger: Set: updated cache object %v (%d bytes)", id, len(blob))
+	log.Printf("ledger: Set: updated cache object %v", id)
 	rerr = ld.storer.Save(id, blob)
 	log.Printf("ledger: Set: updated store object %v err=%v", id, err)
 	return rerr
@@ -147,10 +151,13 @@ func (ld *Ledger) Set(id store.ID, todo model.Todo) (rerr error) {
 // Delete removes a Todo from the ledger. The ledger may recycle IDs of deleted objects.
 // On failure, error is not nil.
 func (ld *Ledger) Delete(id store.ID) error {
+	log.Printf("ledger: Delete: deleting object %v", id)
 	err := ld.storer.Delete(id)
 	if err != nil {
+		log.Printf("ledger: Delete:failed to delete object %v: %v", id, err)
 		return err
 	}
 	delete(ld.blobs, id)
+	log.Printf("ledger: Delete: deleted object %v", id)
 	return nil
 }
