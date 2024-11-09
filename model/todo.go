@@ -33,6 +33,14 @@ type Todo struct {
 	LastUpdateTime time.Time
 }
 
+func (td Todo) String() string {
+	assigned := ""
+	if len(td.Assignee) > 0 {
+		assigned = " @" + td.Assignee + " "
+	}
+	return fmt.Sprintf("<todo={%s}%s [%s] ts=%v>", td.Title, assigned, td.Status, td.LastUpdateTime.Format(time.RFC3339))
+}
+
 // ToAPIv1 converts the object into the corresponding API layer object
 func (td Todo) ToAPIv1() apiv1.Todo {
 	return apiv1.Todo{
