@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
 	"github.com/gotestbootcamp/go-todo-app/ledger"
 	"github.com/gotestbootcamp/go-todo-app/model"
@@ -22,7 +20,9 @@ import (
 
 func TestBacklogIndex(t *testing.T) {
 	fakeStore, err := fake.NewMem()
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatalf("store creation failed: %v", err)
+	}
 
 	num := 0
 	count := 5 // random number > 1
@@ -47,7 +47,9 @@ func TestBacklogIndex(t *testing.T) {
 	}
 
 	ld, err := ledger.New(fakeStore)
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatalf("ledger creation failed: %v", err)
+	}
 
 	req := httptest.NewRequest("GET", "/backlog", strings.NewReader("{}"))
 	rec := httptest.NewRecorder()
@@ -56,15 +58,31 @@ func TestBacklogIndex(t *testing.T) {
 	hndl.ServeHTTP(rec, req)
 
 	res := rec.Body.String()
-	assert.Equal(t, rec.Code, http.StatusOK, "response: %q", res)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected response: code=%d body=%q", rec.Code, res)
+	}
 
 	var resp apiv1.Response
 	err = json.Unmarshal([]byte(res), &resp)
-	assert.NoError(t, err)
-	res.Body.Close()
+	if err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
 
-	assert.Equal(t, resp.Status, apiv1.ResponseSuccess)
-	assert.Nil(t, resp.Error)
-	assert.NotNil(t, resp.Result)
-	assert.Len(t, resp.Result.Items, count)
+	checkResponseIsSuccessWithItems(t, resp, count)
+}
+
+func checkResponseIsSuccessWithItems(t *testing.T, resp apiv1.Response, count int) {
+	t.Helper()
+	if resp.Status != apiv1.ResponseSuccess {
+		t.Fatalf("response status code is not success: %v", resp.Status)
+	}
+	if resp.Error != nil {
+		t.Fatalf("returned unexpected error: %v", resp.Error)
+	}
+	if resp.Result == nil {
+		t.Fatalf("returned nil result")
+	}
+	if len(resp.Result.Items) != count {
+		t.Fatalf("returned unexpected item count; got %d expected %d", len(resp.Result.Items), count)
+	}
 }

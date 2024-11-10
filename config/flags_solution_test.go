@@ -1,6 +1,6 @@
 package config
 
-// solution:part1
+// extra:part1
 
 import (
 	"testing"

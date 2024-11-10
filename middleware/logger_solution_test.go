@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestLogger(t *testing.T) {
@@ -20,7 +19,9 @@ func TestLogger(t *testing.T) {
 		os.Stdout = stdout
 	}()
 	f, err := os.CreateTemp("", "midlogger")
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatalf("temp file creation failed: %v", err)
+	}
 	defer func() {
 		os.Remove(f.Name())
 	}()
@@ -33,6 +34,14 @@ func TestLogger(t *testing.T) {
 
 	f.Sync()
 	got, err := os.ReadFile(f.Name())
-	assert.NoError(t, err)
-	assert.Regexp(t, "middleware.*GET   	/test	testlogger.*", string(got))
+	if err != nil {
+		t.Fatalf("file read failed: %v", err)
+	}
+	ok, err := regexp.Match(".*middleware.*GET   	/test	testlogger.*", got)
+	if err != nil {
+		t.Fatalf("regexp match failed: %v", err)
+	}
+	if !ok {
+		t.Fatalf("logging does not match the expectation: %q", string(got))
+	}
 }

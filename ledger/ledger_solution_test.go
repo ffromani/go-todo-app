@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	apiv1 "github.com/gotestbootcamp/go-todo-app/api/v1"
 	"github.com/gotestbootcamp/go-todo-app/model"
 	"github.com/gotestbootcamp/go-todo-app/store"
@@ -17,7 +15,9 @@ import (
 
 func TestNewLoad(t *testing.T) {
 	fakeStore, err := fake.NewMem()
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatalf("store creation failed: %v", err)
+	}
 
 	num := 0
 	count := 5 // random number > 1
@@ -42,9 +42,15 @@ func TestNewLoad(t *testing.T) {
 	}
 
 	ld, err := New(fakeStore)
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatalf("ledger creation failed: %v", err)
+	}
 
 	todo0, err := ld.Get("0")
-	assert.NoError(t, err)
-	assert.Equal(t, todo0.Title, "fake todo 0")
+	if err != nil {
+		t.Fatalf("ledger get failed: %v", err)
+	}
+	if todo0.Title != "fake todo 0" {
+		t.Fatalf("got unexpected data: %v", todo0)
+	}
 }
