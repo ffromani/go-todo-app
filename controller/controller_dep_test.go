@@ -37,7 +37,11 @@ func TestTodoCreate(t *testing.T) {
 			t.Fatalf("expecting one item back")
 		}
 
-		// TODO validate uuid
+		// TODO the uuid is generated interacting with a remote server
+		// make it deterministic
+		if apiRes.Result.Items[0].ID != "1234" {
+			t.Fatalf("expecting id 1234 got %s", apiRes.Result.Items[0].ID)
+		}
 	})
 }
 
