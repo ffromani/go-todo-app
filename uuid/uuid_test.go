@@ -10,6 +10,7 @@ import (
 )
 
 func TestUUID(t *testing.T) {
+	// TODO: change the code so it leverages this mock
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode([]string{"myuuid"})
 	}))
