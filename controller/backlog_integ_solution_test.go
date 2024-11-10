@@ -61,6 +61,7 @@ func TestBacklogIndex(t *testing.T) {
 	var resp apiv1.Response
 	err = json.Unmarshal([]byte(res), &resp)
 	assert.NoError(t, err)
+	res.Body.Close()
 
 	assert.Equal(t, resp.Status, apiv1.ResponseSuccess)
 	assert.Nil(t, resp.Error)
