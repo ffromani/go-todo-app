@@ -8,7 +8,7 @@ import (
 	"github.com/gotestbootcamp/go-todo-app/model"
 )
 
-func TestMergeTable(t *testing.T) {
+func TestMerge(t *testing.T) {
 	// Setup code
 	toMerge := model.Todo{
 		Title:       "todo1",
