@@ -7,11 +7,11 @@ Note: there are not universal solutions. The proposed one are illustrative. Ther
 
 ## Basics and coverage
 
-- Write one or more (the more the better) unit tests. If unsure where to start: `api/v1` or `config` can be quite simple;
-  for more complex scenarios: `middleware`.
-- Check the coverage before/after the tests. You can use the `make cover-vew` makefile target.
-- Write one or more integration tests, e.g. tests which involve two or more packages. If unsure where to start: `ledger`
-  is probably the simplest case, `controller` provides more (and more complex) opportunities.
+- Write one or more (the more the better) unit tests.
+  If unsure where to start: `api/v1` or `config` can be quite simple; for more complex scenarios: `middleware`.
+- Check the coverage before/after the tests. You can use the `make cover-view` makefile target.
+- Write one or more integration tests, e.g. tests which involve two or more packages.
+  If unsure where to start: `ledger`  is probably the simplest case, `controller` provides more (and more complex) opportunities.
 - Check how the coverage changed before/after the integration tests.
 - Compile the test binaries, and then run them.
 
