@@ -17,18 +17,16 @@ Note: there are not universal solutions. The proposed one are illustrative. Ther
 
 Solutions: please checkout the `part1_solution` branch and `git grep solution:part1`
 
-
 ## Subtests / Table tests
 
 - Modify the `TestMerge` test under [model/todo_merge_test.go](model/todo_merge_test.go) to be a table based
-test. 
+test.
 - Try to have shared code initializing one `Todo` item to be merged
 - Try to make the test execution parallel
 - Run `go test -v -run TestMerge` to see all the tests (and their names)
 - Try to use `go test -run TestMerge/xxx` to run one single test
 
 Examples: [Sub tests and table tests examples](https://github.com/fedepaol/gotestbootcamp/tree/main/subteststabletests)
-
 
 ## Test Fixtures / Golden files
 
@@ -43,13 +41,15 @@ Examples: [Fixtures and golden files examples](https://github.com/fedepaol/gotes
 ## Using ginkgo
 
 - Bootstrap a ginkgo suite:
-```
+
+```bash
 go install github.com/onsi/ginkgo/v2/ginkgo
 go get github.com/onsi/gomega/
 go mod tidy
 mkdir e2e && cd e2e
 ginkgo bootstrap .
 ```
+
 - Run tests using ginkgo: `ginkgo -v ./e2e/...`
 - Write and run one or more e2e tests using ginkgo. You can either assume the `go-todo-app` is running, or run it as part of the test suite. Evaluate the pros and cons of each approach.
 - Integrate gingko custom matcher in the e2e test(s) you wrote
@@ -79,9 +79,9 @@ Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/dependency_
 - Check the [uuid/uuid_test.go](uuid/uuid_test.go) and see why it fails
 - Modify the code so that the result of [uuid/uuid_test.go](uuid/uuid_test.go) is deterministic.
 - Change the test so that:
-    - it verifies that the endpoint is called only once per `NewUUID` call
-    - it verifies it can handle uuids of len=3 and len=10
-    - it verifies that when the call returns a failure, the function returns an error
+  - it verifies that the endpoint is called only once per `NewUUID` call
+  - it verifies it can handle uuids of len=3 and len=10
+  - it verifies that when the call returns a failure, the function returns an error
 
 Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/httpserver](https://github.com/fedepaol/gotestbootcamp/tree/main/httpserver)
 
@@ -89,7 +89,7 @@ Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/httpserver]
 
 - Extend the `TestWithRedis` test under [store/redis_test.go](store/redis_test.go)
 - Fill the emtpy tests
-- Add more tests 
+- Add more tests
 
 # Extras / Stretch goals
 
@@ -113,5 +113,3 @@ Examples under [https://github.com/fedepaol/gotestbootcamp/tree/main/benchmarkin
 
 - Integrate `go-cmp` in the tests used previously. Make sure to use `cmp.Diff` and `cmp.Equal` Good candidates can be tests for `model` or for `api/v1` (`go get github.com/google/go-cmp`)
 - Rewrite existing unit tests to use `testify/assert` (`go get github.com/stretchr/testify`)
-
-
