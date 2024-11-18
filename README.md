@@ -4,6 +4,8 @@ go-todo-app
 A simplistic demo web application in golang to manage TODO list using a JSON-RPC API.
 This is a demo project/learning aid! Don't use anywhere near production.
 
+Slides of the workshop available at [github.com/gotestbootcamp/slides](https://github.com/gotestbootcamp/slides).
+
 Architecture
 ------------
 
